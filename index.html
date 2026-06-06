@@ -871,8 +871,12 @@ function handlePopupSubmit() {
   // Link Web App URL bạn lấy từ Google Apps Script
   var scriptURL = 'https://script.google.com/macros/s/AKfycbwBmTmr8tXSNVrUNGSo3b3S3VGO1HTxY-E2edIA0dnWprC8z9bsOrlll4FO3NLeLpUutQ/exec';
 
-  // Gửi data về Google Sheets
-  fetch(scriptURL, { method: 'POST', body: formData })
+  // Gửi data về Google Sheets (Đã fix lỗi CORS)
+  fetch(scriptURL, { 
+      method: 'POST', 
+      body: formData,
+      mode: 'no-cors' // Lệnh quan trọng để không bị Google chặn
+    })
     .then(response => {
       // Ẩn form, hiện thông báo thành công
       document.getElementById('popup-form').style.display = 'none';
