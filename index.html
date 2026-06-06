@@ -847,44 +847,40 @@ tr:last-child td{border-bottom:none;}
 <script>
 // ── Lead Magnet Popup Submit Handler ──
 function handlePopupSubmit() {
-  var email = document.getElementById('popup-email');
-  if (!email || !email.value || !email.value.includes('@')) {
-    email.style.borderColor = 'rgba(239,68,68,.8)';
-    email.style.boxShadow = '0 0 0 3px rgba(239,68,68,.12)';
-    email.placeholder = 'Please enter a valid email address';
+  var emailInput = document.getElementById('popup-email');
+  var email = emailInput.value;
+  var submitBtn = document.getElementById('popup-submit');
+
+  // Kiểm tra email hợp lệ
+  if (!email || !email.includes('@')) {
+    emailInput.style.borderColor = 'rgba(239,68,68,.8)';
+    emailInput.style.boxShadow = '0 0 0 3px rgba(239,68,68,.12)';
+    emailInput.placeholder = 'Please enter a valid email address';
     return;
   }
-  document.getElementById('popup-form').style.display = 'none';
-  document.getElementById('popup-success').style.display = 'block';
+
+  // Đổi chữ trên nút thành Đang gửi để khách biết
+  var originalBtnText = submitBtn.innerHTML;
+  submitBtn.innerHTML = 'Sending... ⏳';
+  submitBtn.disabled = true;
+
+  // Đóng gói dữ liệu
+  var formData = new FormData();
+  formData.append('email', email);
+
+  // Link Web App URL bạn lấy từ Google Apps Script
+  var scriptURL = 'https://script.google.com/macros/s/AKfycbwBmTmr8tXSNVrUNGSo3b3S3VGO1HTxY-E2edIA0dnWprC8z9bsOrlll4FO3NLeLpUutQ/exec';
+
+  // Gửi data về Google Sheets
+  fetch(scriptURL, { method: 'POST', body: formData })
+    .then(response => {
+      // Ẩn form, hiện thông báo thành công
+      document.getElementById('popup-form').style.display = 'none';
+      document.getElementById('popup-success').style.display = 'block';
+    })
+    .catch(error => {
+      console.error('Error!', error.message);
+      submitBtn.innerHTML = 'Error! Try again.';
+      submitBtn.disabled = false;
+    });
 }
-
-// ── Popup — triggers 7 seconds after page load, once per session ──
-(function(){
-  var popup = document.getElementById('scroll-popup');
-  if (!popup) return;
-  var shown = sessionStorage.getItem('popup_shown');
-  function openPopup() {
-    if (shown) return;
-    shown = true;
-    sessionStorage.setItem('popup_shown', '1');
-    popup.classList.add('active');
-  }
-  function closePopup() { popup.classList.remove('active'); }
-
-  // 7-second delay trigger (replaces scroll event)
-  setTimeout(openPopup, 7000);
-
-  var closeBtn = document.getElementById('popup-close');
-  var backdrop = document.getElementById('popup-backdrop');
-  if (closeBtn) closeBtn.addEventListener('click', closePopup);
-  if (backdrop) backdrop.addEventListener('click', closePopup);
-})();
-
-// ── Scroll Reveal ──
-var io = new IntersectionObserver(function(entries) {
-  entries.forEach(function(e) { if (e.isIntersecting) e.target.classList.add('visible'); });
-}, { threshold: 0.1 });
-document.querySelectorAll('.reveal').forEach(function(el) { io.observe(el); });
-</script>
-</body>
-</html>
